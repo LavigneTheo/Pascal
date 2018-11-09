@@ -90,36 +90,74 @@ Uses Math, SysUtils,  Crt;
     *               processF
     *               processG
     *)
+    
+    (*************************************************************** Constantes *********************************************************)
+    
 const 
+        //Taille du tableau dans lequel est stocker la representation binaire du nombre saisi par l'utilisateur
         size = 37;
+        
+        //Largeur et hauteur de l'ecran ou s'affiche le combre
         widthScreen = 80;
         heightScreen = 25;
+        
+        //La taille maximale en X et Y que le nombre peut occuper dans l'ecran
         xMax = widthScreen -4;
         yMax = heightScreen - 2;
         
+        (*************************************************************** Types *********************************************************)
+        
 type
+        //Tableau utilise pour stocker la reprensation binaire du nombre et son pointeur
         tab = array[0..size - 1] of  integer;
         Tptr = ^tab;
 type
+        (*
+         *  Definition de la composition des elements de la liste chainee. Ceux ci contiennent un pointeur vers l'element enfant (qui sera null si on est en bout de liste).
+         *  Contient un tableau de taille 4 qui sera utilise pour stocker la representation binaire de chaque digit du nombre.
+         *)
         Nptr = ^Node;
         Node = record
                 data : array[0..3] of integer;
                 child : Nptr;
-        end;
+            end;
+            
+     (*************************************************************** Variables globales *********************************************************)
 
 
 var
+        //Pointeur du tableau contenant la representation binaire du nombre
         T : Tptr;
+        
+        (*
+         *  Variables 'zoom', 'xOffset', 'yOffset' seront definit par l'utisateur pour definir le zoom et les decalage en X et en Y
+         *  'freeSpace' reprente l'espace disponible sur l'ecran pour inserer de nouveaux digits.
+         *)
         zoom, xOffset, yOffset, freeSpace : integer;
         number, complement : LongInt;
+        
+        //Declare l'element a la racine de liste et l'element de fin.
         root : Nptr;
         endNode : Nptr;
-        validInput : Boolean;
         
+      (*
+      * Inclusion des fichiers necessaires au fonctionnement de l'application
+      *)
      {$I linkedList.pas}
      {$I equations.pas}
      {$I printing.pas}
+     
+     (*************************************************************** Fonctions *********************************************************)
+     
 
+(*
+ *  Calcule la representation binaire du nombre saisi par l'utilisateur.
+ *
+ *  Detail du calcul :
+ *      Voir 'binaryForList', le procede est le meme
+ *
+ *  Param LongInt : le nombre saisi par l'utilisateur
+ *)
 procedure binary(num : LongInt);
 var
         it, quotient, i : integer;
@@ -131,7 +169,7 @@ begin
              if (quotient = 1) then
              begin
                  T^[it] := 1;
-                 num := num mod LongInt(floor( Power(2, it)));
+                 num := num - LongInt(floor( Power(2, it)));
              end
              else
              begin
@@ -139,32 +177,18 @@ begin
              end;
                  it := it - 1;
             end;
-
 end;
 
-procedure binaryForList(num : LongInt);
-var
-        i : integer;
-        it : integer;
-        quotient : integer;
-begin
-        it :=  3;
-        for i := 0 to 3 do
-         begin
-             quotient := Integer(Floor(num / Power(2, it)));
-             if (quotient = 1) then
-             begin
-                  endNode^.data[it] := 1;
-                 num := num mod Integer(floor( Power(2, it)));
-             end
-             else
-             begin
-                endNode^.data[it] := 0;
-            End;
-            it := it - 1;
-        end;
-end;
-
+(*
+ *  Une fois que la liste chaine est remplie de la representation binaire de chaque digit du nombre, cette fonction appelee au sein 'processNumber'. Pour chaque digit du nombre,
+ *  elle transmet le tableau de taille 4 contenant la representation binaire a des fonction  processA/B/C/D/E/F/G qui determine si le segment pour le digit donne doit etre active
+ *  ou pas. Ces fonctions renvoient un 1 si le segement doit etre active, 0 dans l'autre cas. Ces resultat sont concatenes au sein d'une chaine de caractere.
+ *  Une fois que la chaine contient les etats de tout les segments pour tout les digits du nombre, le resultat est imprime a l'ecran par la fonction 'printSegmentState', et les 
+ *  fonctions 'processHorizontal' et 'processVertical' quand a elles imprime les digits a l'ecran.
+ *  Une fois ces fonctions executees, le calcul du binaire, des segments et l'affichage a ete realise. On peut passer un nouveau tours de boucle si il reste de l'espace a l'ecran.
+ *
+ *  Param LengthNumber : le nombre de digit qui compose le nombre
+ *)
 procedure processList(lengthNumber : integer);
 var
         currentNode : Nptr;
@@ -189,20 +213,57 @@ begin
         for x := 0 to lengthNumber - 1 do
         begin
               	processHorizontal(str, x);
-                processVertical(str, x);                
+                processVertical(str, x);
             end;
-           
 end;
 
 (*
- *
- *
- *
- *
- *
- *
+ *  Recoit un par par les digits qui compose le nombre. Ceux ci lui sont transmis par la fonction 'ProcessNumber'. Le digit etant compris entre 0 et 9, on itere 4 fois sur le nombre
+ *  en testant au fur et a mesure de quelle puissance de 2 il est calculer. Le resultat compose de 1 et de 0 est inserer dans tableau de taille a 4 au sein d'un element de la liste
+ *  chainee en vue d'une utilisation ult‚rieur. 
+ *  
+ *  Detail du calcul du binaire
+ *  Power(2, it) : 'it' commence a 3 puis diminue jsuqu'a atteindre 0. Ainsi ce morceau de code renvoie les de 2^3, 2^2, 2^1, 2^0 
+ *  Floor(num / Power(...)) : test la divibilite du nombre par les puissance enonce ci dessus. On arrondi le resultat car ce qui nous interesse est de savoir si le quotient est au
+ *  egal a 1, ce qui signifie dans ce cas que le binaire du nombre en question contient la puissance de en question. Par exemple, pour 2, le test par 2^3 et 2^2 sera arrondi a 0
+ *   tandis que 2^1 sera arrondis a 1. 2^0 ne sera pas ajouter, voir ci dessous.
+ *  num := num mod Integer(floor( Power(2, it))) : pour eviter d'ajouter toute les puissances de 2 presente aprŠs MSB, on enleve ensuite au nombre la valeur du bit qui a ete 
+ *  trouve. Ainsi pour 2, on eleve 2^1, le nombre est desormais egala a 0 et aucune autre puissance de 2 ne sera ajoute dans le tableau.
+ *  
+ *  Param Integer : digit entre 0 et 9
  *)
-procedure processNumber(number : LongInt;index : integer);
+procedure binaryForList(num : Integer);
+var
+        quotient, i, it : integer;
+begin
+        it :=  3;
+        for i := 0 to 3 do
+         begin
+             quotient := Integer(Floor(num / Power(2, it)));
+             if (quotient = 1) then
+             begin
+                  endNode^.data[it] := 1;
+                 num := num - Integer(floor( Power(2, it)));
+             end
+             else
+             begin
+                endNode^.data[it] := 0;
+            End;
+            it := it - 1;
+        end;
+end;
+
+(*
+ *  Premiere fonction a etre appele pour traiter le nombre entre par l'utilisateur. Elle itere dans sur chaque digit du nombre et les transmet un par un a la fonction
+ *  'BinaryForList'. A chaque tours de boucle elle ajoute un element vide a liste chaine afin que 'BinaryForList' puisse travailler au prochain tour de boucle sur un element
+ *  vierge.
+ *  Pour iterer sur les digits du nombre, celui ci est convertit en chaine de caractere puis on traite cette chaine comme un tableau de caractere en iterant sur chaque caractere
+ *  qu'elle contient.
+ *  A la fin du processus, la liste contient la representation binaire de chaque digit du nombre.
+ *
+ *  Param LongInt : Nombre entre par l'utilisateur
+ *)
+procedure processNumber(number : LongInt);
 var
         newNumber : Nptr;
         str : string;
@@ -420,25 +481,15 @@ begin
 	
 end;
 	
-(*
- *  Main
- *
- *
- *)
+
+    (*************************************************************** Main *********************************************************)
+
 begin
         new(T);
         
-        validInput := false;
-        
         Repeat
                 askUser();
-                
-                if checkInput() = true Then
-                begin
-                    validInput := true;
-                End;
-        	
-        Until validInput = TRUE;
+        Until checkInput() = TRUE;
         
         Repeat
             printScreen();
@@ -450,7 +501,7 @@ begin
             root^.child := nil;
             endNode := root;
 
-            processNumber(number, 0);
+            processNumber(number);
             
             gotoxy(86, 20);
             write('Completer le nombre : ');
