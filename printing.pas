@@ -13,8 +13,8 @@ procedure printBinaryRecu(index : integer);
 begin
         if(index = size - 1) then
         begin
-        	gotoxy(63, 1);
-                write('En binaire cela donne : ');
+        	gotoxy(58, 1);
+                write('Equivalent binaire : ');
         end;
 
         if(index >= 0) then
