@@ -1,8 +1,8 @@
 program test;
-Uses Math, sysutils,  Crt;
+Uses Math, SysUtils,  Crt;
 
 const
-        size = 30;
+        size = 35;
         widthScreen = 80;
         heightScreen = 25;
         xMax = widthScreen -4;
@@ -152,7 +152,16 @@ End;
 function getHeightNumber : integer;
 begin 
 	getHeightNumber := 2 * zoom + 5 + yOffset;
-	End;
+End;
+
+Procedure processMargin;
+begin
+
+	gotoxy(86, 16);
+    write('Marge en absisse :  ',  xMax - getWidthNumber(), '   ');
+    gotoxy(86, 17);
+    write('Marge en ordonne :  ',  yMax - getHeightNumber(), '  ');
+	end;
 
 Procedure processFreeSpace;
 var
@@ -163,19 +172,14 @@ begin
 	widthNumber := getWidthNumber();
 	cumSize := widthNumber + 1 + xSizeDigit;
     	freeSpace := 0;
+    	
     	While cumSize <= xMax do
     	Begin
     		Inc(freeSpace);
     		cumSize := cumSize + 1 + xSizeDigit;
     		
         end;
-        
-    	gotoxy(86, 16);
-    	write('Marge en absisse :  ',  xMax - widthNumber);
-    	gotoxy(86, 17);
-    	write('Marge en ordonne :  ',  yMax - getHeightNumber());
-    	gotoxy(86, 18);
-    	write('Chiffre placable :  ',  freeSpace);
+    	gotoxy(20, 20);
 	end;
 
 function checkInput : Boolean;
@@ -208,7 +212,9 @@ begin
     	checkInput := true;
     	
     	processFreeSpace();
-    	
+    	processMargin();
+    	gotoxy(86, 18);
+    	write('Chiffre placable :  ',  freeSpace);
     	end;
 end;
 
@@ -216,16 +222,30 @@ Function updateScreen : Boolean;
 var
     maxLongInt : LongInt;
 begin
-	//gotoxy(1, 1);
-	//write('Entrez le nombre : ', number);
-	//processFreeSpace();
-	                       
+	gotoxy(1, 1);
+	write('Entrez le nombre : ', number);
+	processFreeSpace();
 	
-	 
-	number := number * Floor(Power(10, Length(IntToStr(complement)))) + complement;
+	if (Length(IntToStr(complement)) <= freeSpace) Then
+	begin
+        number := number * Floor(Power(10, Length(IntToStr(complement)))) + complement;
+        end;
 	
-	updateScreen := false;
-	end;
+	 if (freeSpace = 0) Then
+	 begin
+	 	updateScreen := false;
+    End
+    Else
+    Begin
+    	updateScreen := true;
+    	processMargin();
+    	
+    	gotoxy(86, 18);
+    	write('Chiffre placable :  ',  freeSpace - Length(IntToStr(complement)), '    ');
+    	end;
+	
+end;
+	
 
 begin
         new(T);
@@ -258,12 +278,10 @@ begin
             write('Completer le nombre : ');
             readln(complement);
             
-        	Until (freeSpace = 0) OR (updateScreen() = true);
+        	Until (updateScreen() = false);
         
         gotoxy(86, 18);
     	write('Nombre maximum atteint');
-        
-        Readln();
         
         dispose(T);
         freeList(root);
