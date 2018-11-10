@@ -1,12 +1,13 @@
 
 (*
- *  En charge de l'impression de la reprentation binaire du nombre (en haut a droite de la fenetre)
- *  La recursivite n'est pas necessaire mais m'a permis de verifier son fonctionnement en Pascal avant le developpement de la liste chainee. La recursivite s'arrete lorque 
- *  l'index est inferieur a 0.
+ *  En charge de l'impression de la reprentation binaire du nombre (en haut a droite de la fenˆtre)
+ *  La r‚cursivit‚ n'est pas necessaire, juste un petit entraŒnement avant le developpement de la liste chain‚e. 
+  * La r‚cursivit‚ s'arrete lorque l'index est inferieur a 0.
  *
- *  Param Integer index : l'index dans lequel on se trouve dans le tableau
+ *  Param Integer 
+ *                  index : l'index auxquel on se trouve dans le tableau
  *)
-procedure printBinaryRecu(index : integer);
+procedure printBinary(index : integer);
 begin
         if(index = size - 1) then
         begin
@@ -17,23 +18,21 @@ begin
         if(index >= 0) then
         begin
                 write(T^[index]);
-                printBinaryRecu(index - 1);
-        end
-        else if(index = -1) then
-        begin
-                writeln();
+                printBinary(index - 1);
         end;
 end;
 
 (*
- *  Imprime les segments verticaux (B, C, E, F). 
+ *  Imprime un segment vertical (B, C, E, F). 
  *
- *  Detail du calcul de positionnement :
- *      x : correspond a la position du digit sur l'axe des absisses avant application du zoom
- *      y : correspond a la position du digit sur l'axe des ordonnees avant application du zoom
- *      xZoomEffect :  si on est sur un segment a droite (B et C), le zoom du digit courant doit etre pris en compte ce qui n'est pas le cas des segments de gauche (D et E)
- *      yZoomEffect : Meme problematique sur l'axe des ordonnees, l'effet du zoom n'est pas le meme selon que l'ont se trouve sur le segment du haut ou du bas.
- *      it : valeur de la boucle pour, fait au minimum 3 tours (taille par default du digit) a quoi on ajoute le zoom
+ *  D‚tails du calcul de positionnement :
+ *      x : correspond … la position du digit sur l'axe des absisses avant application du zoom
+ *      y : correspond … la position du digit sur l'axe des ordonn‚es avant application du zoom
+ *      xZoomEffect :  si on est sur un segment … droite (B et C), le zoom du digit courant doit etre pris en compte 
+ *          ce qui n'est pas le cas des segments de gauche (D et E)
+ *      yZoomEffect : l'effet du zoom n'est pas le meme selon que l'ont se trouve sur un segment du haut (B et F) 
+ *          ou du bas (C et E). Details suppl‚mentaires dans la fonction 'printVertical'
+ *      it : valeur de la boucle pour, fait au minimum 3 tours (taille par default du digit) … quoi on ajoute le zoom
  *
  *  Param : Integer
  *                  x : position sur l'axe des absisses
@@ -47,68 +46,79 @@ var
 begin 
 	for it := 0 to 2 + zoom do
     	begin
-            gotoxy(x + xZoomEffect, yOffset + y + it + yZoomEffect);
+            gotoxy(x + xZoomEffect,  y + it + yZoomEffect);
              write('*');
          end;
 	end;
  
 (*
- *  Calcules les differentes valeurs necessaire a l'impression du segment vertical a la bonne place sur l'ecran
+ *  Calcule les positions de d‚part  des segments verticaux avant leurs impr‚ssions … l'‚cran (B, C, E, F)
  *
- *  Detail du calcul :
- *      xTotalOffset : le dacalage minimum du digit avant application du zoom
- *      xOffset + index * 1 + index * 3 : xOffset est la valeur du decalage en absisse definie par l'utilisateur. Ceux a quoi on ajoute l'index dans lequel on se trouve pour representer
- *          les espaces entre les chiffre. Exemple, le deuxieme digit aura un index de 1, donc ajoutera bien l'equivalent de 1 espace. index * 3 repercute la taille par default des digit 
- *           precedents.
- *      printVertical(5 + xTotalOffset, ...) : si l'ont est sur un segment de gauche, on ajoute 5 car l'affichage commence a 2 et le digit fait 3 de large avant application du zoom. Lorsque
- *           l'ont est a droite la valeur est de 3.
- *      printVertical(..., 5, ..., ..., ...) : repercute le fait que si l'ont est a en haut, on se trouve au minimum en 5, tandis que si l'ont est en bas on se trouve au minimum en 7
- *      printVertical(..., ..., (index + 1) * zoom, ...) : applique l'effet du zoom sur l'axe des absisse, si l'ont est a droite, le zoom du digit courant doit etre appliquer, ce qui n'est pas
- *          le cas a gauche.
- *      printVertical(..., ..., ..., 0) : applcation du zoom sur les ordonnees. Celui ci n'a pas d'effet dur la position initiale quand on est en haut. La position du segement du bas en 
- *      revanche sera increment‚e de la valeur du zoom
+ *  Details du calcul :
+ *      xTotalOffset : le d‚calage minimum du digit avant application du zoom
+ *      xOffset + index * 1 + index * 3 : xOffset est la valeur du d‚calage en absisse d‚finie par l'utilisateur. 
+ *          Ceux … quoi on ajoute l'index dans lequel on se trouve pour representer les espaces entre les chiffre. 
+ *          Exemple, le deuxieme digit aura un index de 1, donc ajoutera bien l'equivalent de 1 espace. index * 3 
+ *          r‚percute la taille par default des digit precedents.
+ *      printVertical(5 + xTotalOffset, ...) : si l'on est sur un segment de droite, on ajoute 5 car l'affichage 
+ *          commence a 2 et le digit fait 3 de large avant application du zoom. Lorsque l'ont est a gauche la valeur 
+ *          est de 3.
+ *      printVertical(..., 5 +yOffset , ..., ..., ...) : r‚percute le fait que si l'ont sur segment du haut, on se trouve au 
+ *          minimum en 5, tandis que si l'ont est en bas on se trouve au minimum en 7. A cela on ajoute le d‚calage
+ *          en ordonn‚ sp‚cifi‚ par l'utilisateur
+ *      printVertical(..., ..., (index + 1) * zoom, ...) : applique l'effet du zoom sur l'axe des absisse, si l'ont est … 
+ *          droite, le zoom du digit courant doit ˆtre appliquer, ce qui n'est pas le cas a gauche.
+ *      printVertical(..., ..., ..., 0) : application du zoom sur les ordonn‚s. Celui ci n'a pas d'effet sur la position 
+ *      initiale quand on est sur un segment du haut. La position du segment du bas en revanche sera increment‚e 
+ *      la valeur du zoom
  *           
  *      Param String
- *                      str : chaine de caractere contenant l'etat des segments
+ *                      str : chaine de caractere contenant l'etat de tout les segments pour tout les digits
  *                  Integer
  *                      index : le digit sur lequel on se trouve, le premier digit aura l'index 0
  *)
 Procedure processVertical(var str : string; index : integer);
 var 
     xTotalOffset : integer;
-   
 begin
 	xTotalOffset := xOffset + index * 1 + index * 3;
+	
+	//B
 	if(StrToInt(str[2 + 7 * index]) = 1) Then
     Begin
-    	printVertical(5 + xTotalOffset, 5, (index + 1) * zoom,0);
+    	printVertical(5 + xTotalOffset, 5 + yOffset, (index + 1) * zoom, 0);
      end;
      
+     //C
      if(StrToInt(str[3 + 7 * index]) = 1) Then
     Begin
-    	printVertical(5 + xTotalOffset, 7, (index + 1) * zoom, zoom);
+    	printVertical(5 + xTotalOffset, 7 + yOffset, (index + 1) * zoom, zoom);
      end;
      
+     //E
       if(StrToInt(str[5 + 7 * index]) = 1) Then
     Begin
-       printVertical(3 + xTotalOffset, 7, index * zoom, zoom);
+       printVertical(3 + xTotalOffset, 7 + yOffset, index * zoom, zoom);
      end;
      
+     //F
       if(StrToInt(str[6 + 7 * index]) = 1) Then
     Begin
-        printVertical(3 + xTotalOffset, 5, index * zoom, 0);
+        printVertical(3 + xTotalOffset, 5 + yOffset, index * zoom, 0);
          end;
 end;
 
 (*
- *  Imprime les segments horizontaux (A, D, G). 
+ *  Imprime un segment horizontal (A, D, G). 
  *
- *  Detail du calcul de positionnement :
- *      x : correspond a la position du digit sur l'axe des absisses avant application du zoom
- *      y : correspond a la position du digit sur l'axe des ordonnees avant application du zoom
- *      xZoomEffect :  repercute l'effet du zoom sur l'axe des absisses
- *      yZoomEffect : repercute l'effet du zoom sur l'axe des ordonnees. Cette valeur varie selon que l'ont soit en haut, au milieu ou en bas
- *      it : valeur de la boucle pour, fait au minimum 3 tours (taille par default du digit) a quoi on ajoute le zoom
+ *  D‚tails du calcul de positionnement :
+ *      x : correspond … la position du digit sur l'axe des absisses avant application du zoom
+ *      y : correspond … la position du digit sur l'axe des ordonn‚es avant application du zoom
+ *      xZoomEffect :  cette valeur est la mˆme pour tout les segments puisque ce sont tous des segments qui
+ *          commence … gauche
+ *      yZoomEffect : l'effet du zoom n'est pas le meme selon que l'ont se trouve sur le segment du haut (A) 
+ *          du milieu (G) ou du bas (D). Details suppl‚mentaires dans la fonction 'printHorizontal'
+ *      it : valeur de la boucle pour, fait au minimum 3 tours (taille par default du digit) … quoi on ajoute le zoom
  *
  *  Param : Integer
  *                  x : position sur l'axe des absisses
@@ -122,24 +132,34 @@ var
 begin 
 	for it := 0 to 2 + zoom do
     	begin
-            gotoxy(x + it + xZoomEffect, yOffset + y + yZoomEffect);
+            gotoxy(x + it + xZoomEffect,  y + yZoomEffect);
              write('*');
          end;
 	end;
 
 (*
- *  Calcule les differentes valeurs necessaire a l'impression du segment horizontal a la bonne place sur l'ecran
+ *  Calcule les positions de d‚part  des segments horizontaux avant leurs impr‚ssions … l'‚cran (A, D, G)
  *
- *  Detail du calcul :
- *      xTotalOffset : le dacalage minimum du digit avant application du zoom
- *      xOffset + index * 1 + index * 3 + 3:meme calcul que dans la fonction  'processVertical', on ajoute 3 car tout les segements horizontaux considerer comme a gauche
- *      printHorizontal(..., 5, ..., ..., ...) : si l'ont est en haut (A), on est au minimum en 5, au milieu (G) en 7, en bas (D) en 9
- *      printHorizontal(..., ..., index * zoom, ...) : applique l'effet du zoom sur l'axe des absisse, identique pour les segments horizontaux
- *      printHorizontal(..., ..., ..., 0) : applcation du zoom sur les ordonnees. Celui ci n'a pas d'effet dur la position initiale quand on est en haut. La position du segement du milieu
- *      sera incremente de la valeur du zoom et celui du bas 2 fois la valeur du zoom
+ *  Details du calcul :
+ *      xTotalOffset : le d‚calage minimum du digit avant application du zoom
+ *      xOffset + index * 1 + index * 3 + 3: xOffset est la valeur du d‚calage en absisse d‚finie par l'utilisateur. 
+ *          Ceux … quoi on ajoute l'index dans lequel on se trouve pour representer les espaces entre les chiffre. 
+ *          Exemple, le deuxieme digit aura un index de 1, donc ajoutera bien l'equivalent de 1 espace. index * 3 
+ *          r‚percute la taille par default des digit precedents. + 3 r‚percute le fait l'ecran commence au 3e pixel
+ *      printHorizontal(xTotalOffset, ...) : la valeur est la mˆme pour tout les segments car ce sont des segments
+ *          situ‚s … gauche
+ *      printHorizontal(..., 5 +yOffset , ..., ..., ...) : r‚percute le fait que si l'ont le segment du haut (A), on se trouve au 
+ *          minimum en 5, du milieu (G) en 7, en bas (D) on se trouve au minimum en 9. A cela on ajoute le d‚calage
+ *          en ordonn‚ sp‚cifi‚ par l'utilisateur
+ *      printHorizontal(..., ..., (index + 1) * zoom, ...) : applique l'effet du zoom sur l'axe des absisse. La valeur est
+ *          la mˆme pour tout les s‚gments car ils sont tous … gauche. On n'aura donc jamais … consid‚r‚ le zoom
+ *          du digit courant.
+ *      printHorizontal(..., ..., ..., 0) : application du zoom sur les ordonn‚s. Celui ci n'a pas d'effet sur la position 
+ *          initiale quand on est sur le segment du haut (A). La position du segment du milieu (G) en revanche sera 
+ *          increment‚e de la valeur du zoom, tandis que celui du bas (D) sera incr‚ment‚ de 2 fois le zoom
  *           
  *      Param String
- *                      str : chaine de caractere contenant l'etat des segments
+ *                      str : chaine de caractere contenant l'etat de tout les segments pour tout les digits
  *                  Integer
  *                      index : le digit sur lequel on se trouve, le premier digit aura l'index 0
  *)
@@ -149,24 +169,27 @@ var
 begin
 	xTotalOffset := xOffset +  index * 1 + index * 3 + 3;
     
+    //A
 	if(StrToInt(str[1 + 7 * index]) = 1) Then
      Begin
-     	printHorizontal(xTotalOffset, 5, index * zoom, 0);
+     	printHorizontal(xTotalOffset, 5 + yOffset, index * zoom, 0);
      End;
      
+     //D
      if(StrToInt(str[4 + 7 * index]) = 1) Then
      Begin
-        printHorizontal(xTotalOffset, 9, index * zoom, zoom * 2);
+        printHorizontal(xTotalOffset, 9 + yOffset, index * zoom, zoom * 2);
      End;
      
+     //G
      if(StrToInt(str[7 + 7 * index]) = 1) Then
      Begin
-     	printHorizontal(xTotalOffset, 7, index * zoom, zoom);
+     	printHorizontal(xTotalOffset, 7 + yOffset, index * zoom, zoom);
     End;
 end;
 
 (*
- *  Imprime le cadre a l'ecran (80 * 25)
+ *  Imprime le cadre … l'ecran (80 * 25)
  *
  *  Param X
  *)
@@ -197,10 +220,9 @@ begin
      
      (*
       * Imprime l'etat des segement sous forme de 1 et 0.
-      * 
       *
       * Param String
-      *                 data : contient la l'etat de tout les segment pour chaque
+      *                 data : contient la l'etat de tout les segments pour chaque digit du nombre
       *             Integer
       *                 lengthNumber : la longueur du nombre
       *)
